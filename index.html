@@ -1,0 +1,596 @@
+<title>Mi Cuaderno Mágico</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+[hidden]{display:none!important}
+/* Layout: cuaderno de papel sobre cielo nocturno; una página por actividad, crayolas abajo de cada dibujo, controles grandes para manos pequeñas. Mismo mundo visual del cuento "Mi Ángel y Yo". */
+:root{
+  --cielo:#141a3e;
+  --cielo-2:#222a62;
+  --papel:#fbf3df;
+  --papel-2:#f4ead0;
+  --tinta:#2a2456;
+  --tinta-suave:#6a6297;
+  --oro:#f7c85c;
+  --oro-hondo:#c99325;
+  --lavanda:#e9e2ff;
+  --rosa:#ff8fa3;
+  --display:"Grandstander","Baloo 2","Comic Sans MS",system-ui,sans-serif;
+  --texto:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+html,body{background:var(--cielo);color:var(--papel)}
+body{
+  font-family:var(--texto);
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:18px 36px;
+  background:
+    radial-gradient(1.5px 1.5px at 12% 18%,#fff8 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 78% 9%,#fff7 50%,transparent 51%),
+    radial-gradient(2px 2px at 90% 42%,#ffe9a888 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 6% 66%,#fff6 50%,transparent 51%),
+    radial-gradient(1200px 600px at 50% -10%,var(--cielo-2),var(--cielo));
+  background-attachment:fixed;
+}
+.cuaderno{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.cabecera{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.marca{display:flex;align-items:center;gap:10px;min-width:0}
+.marca b{font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.04em;color:var(--oro);display:block;line-height:1.1}
+.marca span{font-size:12.5px;color:#c9c3e3;letter-spacing:.06em;text-transform:uppercase}
+.guardado{font-size:13px;color:#c9c3e3;display:flex;align-items:center;gap:6px}
+.guardado i{width:8px;height:8px;border-radius:50%;background:#8ed6c4;display:block}
+.chip-btn{font:700 14px/1 var(--texto);color:var(--papel);background:#ffffff14;border:1.5px solid #ffffff2a;border-radius:999px;padding:10px 14px;cursor:pointer}
+
+/* Hoja con espiral */
+.hoja{position:relative;background:var(--papel);color:var(--tinta);border-radius:20px 22px 22px 20px;padding:26px clamp(18px,4vw,40px) 26px clamp(30px,5vw,54px);box-shadow:0 18px 44px #0007;min-height:420px}
+.hoja::before{content:"";position:absolute;left:12px;top:22px;bottom:22px;width:14px;
+  background:radial-gradient(circle at 7px 7px,var(--cielo) 4.5px,#c9bfa3 5px,transparent 6px) 0 0/14px 34px repeat-y}
+.pagina{display:flex;flex-direction:column;gap:14px}
+.folio{font:800 12px/1 var(--texto);letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-suave)}
+h1,h2{font-family:var(--display);color:var(--tinta);margin:0;text-wrap:balance;line-height:1.05}
+h1{font-weight:800;font-size:clamp(40px,7vw,62px)}
+h1 em{font-style:normal;color:#d9902a}
+h2{font-weight:800;font-size:clamp(28px,4.6vw,40px)}
+.intro{margin:0;font-size:clamp(17px,2.3vw,19px);line-height:1.55;font-weight:600;color:#4a4378;max-width:58ch}
+.campo{display:flex;flex-direction:column;gap:6px;font-weight:800;font-size:15px;min-width:0}
+.campo input{font:700 22px/1.2 var(--display);color:var(--tinta);background:#fff;border:2.5px solid #d8cfee;border-radius:14px;padding:12px 14px;width:100%;box-sizing:border-box}
+.campo input:focus,textarea:focus{outline:none;border-color:var(--oro);box-shadow:0 0 0 4px #f7c85c55}
+.fila{display:flex;flex-wrap:wrap;gap:14px}
+.fila>*{flex:1 1 220px}
+.boton{font:800 18px/1 var(--display);color:var(--tinta);background:var(--oro);border:none;border-radius:16px;padding:15px 22px;cursor:pointer;box-shadow:0 5px 0 var(--oro-hondo);display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.boton:active{transform:translateY(3px);box-shadow:0 2px 0 var(--oro-hondo)}
+.boton.suave{background:var(--lavanda);box-shadow:0 5px 0 #c3b7ef}
+button:focus-visible,input:focus-visible,textarea:focus-visible,[data-zona]:focus-visible{outline:3px solid var(--oro);outline-offset:3px}
+
+/* Colorear */
+.lienzo{background:#fff;border-radius:18px;border:2.5px solid #e6dcc3;overflow:hidden;max-width:520px;width:100%;margin:0 auto}
+.lienzo svg{display:block;width:100%;height:auto}
+[data-zona]{cursor:pointer;stroke:#2a2456;stroke-width:2.4;stroke-linejoin:round;transition:fill .25s}
+.linea{fill:none;stroke:#2a2456;stroke-width:2.4;stroke-linecap:round;pointer-events:none}
+.ojo{fill:#2a2456;pointer-events:none}
+.crayolas{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:560px;margin:0 auto}
+.crayola{width:40px;height:40px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px #d9cfb4;cursor:pointer;padding:0}
+.crayola[aria-pressed="true"]{box-shadow:0 0 0 3px var(--tinta);transform:scale(1.12)}
+.herramientas{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.mini{font:800 14px/1 var(--texto);color:var(--tinta);background:var(--lavanda);border:none;border-radius:999px;padding:10px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.mini[aria-pressed="true"]{background:var(--tinta);color:var(--papel)}
+
+/* Dibujo libre */
+.pizarra{background:#fff;border-radius:18px;border:2.5px solid #e6dcc3;overflow:hidden;max-width:620px;width:100%;margin:0 auto;touch-action:none}
+.pizarra canvas{display:block;width:100%;height:auto;aspect-ratio:4/3;max-width:100%;cursor:crosshair}
+
+/* Carta */
+.carta{background:#fff;border-radius:16px;border:2.5px solid #e6dcc3;padding:18px 20px;max-width:620px;width:100%;box-sizing:border-box;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.carta .saludo{font:700 22px/1 var(--display)}
+.carta .saludo span{color:#d9902a}
+textarea{font:600 20px/36px var(--display);color:var(--tinta);width:100%;box-sizing:border-box;min-height:260px;border:none;resize:vertical;padding:0 4px;
+  background:repeating-linear-gradient(transparent 0 35px,#cfd9f5 35px 36px);background-attachment:local}
+.carta .firma{font:700 20px/1.2 var(--display);text-align:right}
+
+/* Diario de señales */
+.tabla-scroll{overflow-x:auto;max-width:100%}
+.senales{border-collapse:separate;border-spacing:6px;margin:0 auto}
+.senales th{font:800 13px/1.2 var(--texto);color:var(--tinta-suave);text-align:center;padding:2px}
+.senales th.dia{text-align:left;font:700 16px/1 var(--display);color:var(--tinta);padding-right:6px;white-space:nowrap}
+.senales th svg{display:block;margin:0 auto 4px}
+.sello{width:46px;height:46px;border-radius:14px;border:2px dashed #d8cfee;background:#fff;cursor:pointer;display:grid;place-items:center;padding:0}
+.sello svg{opacity:0;transform:scale(.4);transition:.3s cubic-bezier(.3,1.6,.5,1)}
+.sello[aria-pressed="true"]{border-style:solid;border-color:var(--oro);background:#fff7d9}
+.sello[aria-pressed="true"] svg{opacity:1;transform:none}
+.leyenda{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center;font-weight:700;font-size:14px;color:#4a4378}
+.leyenda span{display:inline-flex;align-items:center;gap:5px}
+
+/* Gracias */
+.corazones{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.corazon{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px}
+.corazon svg{width:110px;height:auto;max-width:100%}
+.corazon path{fill:#fff;stroke:#ff8fa3;stroke-width:4;transition:fill .4s}
+.corazon.lleno path{fill:#ffc2cf}
+.corazon input{font:700 18px/1.2 var(--display);color:var(--tinta);text-align:center;background:#fff;border:2.5px solid #f6d0d8;border-radius:12px;padding:10px;width:100%;box-sizing:border-box;min-width:0}
+
+/* Miedos */
+.miedo-caja{background:#1f2656;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px;align-items:center;color:var(--papel);position:relative;overflow:hidden;min-height:200px}
+.miedo-caja label{font-weight:800;font-size:16px;align-self:stretch}
+.miedo-caja input{font:700 20px/1.2 var(--display);color:var(--tinta);background:var(--papel);border:none;border-radius:14px;padding:12px 14px;width:100%;box-sizing:border-box;margin-top:6px}
+.miedo-texto{font:800 clamp(22px,4vw,30px)/1.2 var(--display);text-align:center;color:#fff;transition:transform 1.4s ease, opacity 1.4s ease, letter-spacing 1.4s;min-height:1.2em}
+.miedo-texto.achica{transform:scale(.15) translateY(-200px);opacity:0;letter-spacing:-.1em}
+.mensaje-lumi{background:var(--papel);color:var(--tinta);border-radius:18px 18px 18px 6px;padding:12px 16px;font-weight:800;font-size:17px;line-height:1.4;max-width:420px;animation:aparece .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes aparece{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+.chispa{position:absolute;width:14px;height:14px;pointer-events:none;animation:vuela 1.6s ease-out forwards}
+@keyframes vuela{to{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0}}
+.lista-estrellas{display:flex;flex-wrap:wrap;gap:8px}
+.lista-estrellas span{display:inline-flex;align-items:center;gap:6px;background:var(--lavanda);border-radius:999px;padding:7px 12px;font-weight:700;font-size:14px;text-decoration:line-through;text-decoration-color:#d9902a;text-decoration-thickness:2px}
+
+/* Certificado */
+.certificado{background:#fffaf0;border-radius:18px;padding:clamp(18px,4vw,34px);text-align:center;position:relative;border:3px solid var(--oro);box-shadow:inset 0 0 0 6px #fffaf0,inset 0 0 0 8px #f7c85c66;display:flex;flex-direction:column;gap:10px;align-items:center}
+.certificado .eyebrow{font:800 12px/1 var(--texto);letter-spacing:.18em;text-transform:uppercase;color:#b07a10}
+.certificado h3{font:800 clamp(24px,4.2vw,34px)/1.1 var(--display);margin:0;color:var(--tinta);text-wrap:balance}
+.certificado .nombre{font:800 clamp(30px,6vw,46px)/1.1 var(--display);color:#d9902a;border-bottom:2px dashed #e6c77f;padding:0 14px 4px;max-width:100%;overflow-wrap:anywhere}
+.certificado p{margin:0;font-size:clamp(16px,2.3vw,19px);line-height:1.5;font-weight:600;max-width:46ch}
+.certificado .oracion{font:700 clamp(15px,2.2vw,17px)/1.5 var(--display);color:#4a4378}
+.firmas{display:flex;flex-wrap:wrap;gap:20px 40px;justify-content:center;margin-top:10px;align-self:stretch}
+.firmas div{flex:1 1 180px;max-width:240px;border-top:2px solid var(--tinta);padding-top:6px;font-weight:700;font-size:13px;color:var(--tinta-suave)}
+.firmas b{display:block;font:700 18px/1.2 var(--display);color:var(--tinta);margin-bottom:2px}
+.sello-oro{width:84px;height:84px}
+
+.mandos{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.nav{width:62px;height:62px;flex:none;border-radius:50%;border:none;cursor:pointer;background:var(--oro);color:var(--tinta);display:grid;place-items:center;box-shadow:0 5px 0 var(--oro-hondo)}
+.nav:active{transform:translateY(3px);box-shadow:0 2px 0 var(--oro-hondo)}
+.nav[disabled]{visibility:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--cielo)}
+.barra-top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:#1b2250f2;border:1.5px solid #ffffff22;border-radius:18px;padding:7px;box-shadow:0 8px 24px #0006;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;scroll-behavior:smooth;scroll-padding-inline:40px}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;display:inline-flex;align-items:center;gap:7px;font:800 14px/1 var(--texto);color:var(--papel);background:#ffffff12;border:none;border-radius:12px;padding:9px 12px 9px 9px;cursor:pointer;white-space:nowrap}
+.chips button i{font:800 13px/1 var(--display);font-style:normal;width:24px;height:24px;border-radius:50%;background:#ffffff22;display:grid;place-items:center;flex:none}
+.chips button[aria-current="true"]{background:var(--oro);color:var(--tinta)}
+.chips button[aria-current="true"] i{background:#ffffff88}
+.hoja{scroll-margin-top:calc(env(safe-area-inset-top,0px) + 76px)}
+.progreso{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;min-width:0}
+.progreso b{font:800 17px/1.2 var(--display);color:var(--papel)}
+.progreso span{font:700 13px/1.3 var(--texto);color:#c9c3e3}
+.menu-titulo{font:800 20px/1.2 var(--display);margin-top:6px}
+.menu{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.menu button{text-align:left;display:flex;gap:10px;align-items:flex-start;background:#fff;border:2px solid #e6dcc3;border-radius:16px;padding:12px;cursor:pointer;color:var(--tinta);min-width:0}
+.menu button:hover{border-color:var(--oro);background:#fffaf0}
+.menu button i{font:800 15px/1 var(--display);font-style:normal;width:30px;height:30px;border-radius:50%;background:var(--oro);display:grid;place-items:center;flex:none}
+.menu button b{display:block;font:800 16px/1.2 var(--display)}
+.menu button span{display:block;font:600 13px/1.35 var(--texto);color:var(--tinta-suave);margin-top:3px}
+.pie{text-align:center;font-size:12.5px;color:#a9a3cc;letter-spacing:.04em;margin:0}
+
+@media (max-width:560px){
+  .nav{width:54px;height:54px}
+  .crayola{width:36px;height:36px}
+  .sello{width:36px;height:36px;border-radius:10px}
+  .sello svg{width:20px;height:20px}
+  .senales{border-spacing:3px}
+  .senales th{font-size:10.5px}
+  .senales th svg{width:20px;height:20px}
+  .senales th.dia{font-size:14px;padding-right:2px}
+  .indice button{width:30px;height:30px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+@media print{
+  html,body{background:#fff!important}
+  .cabecera,.barra-top,.menu,.menu-titulo,.mandos,.pie,.crayolas,.herramientas,.boton,.mini{display:none!important}
+  .hoja{box-shadow:none;padding:0;background:#fff}
+  .hoja::before{display:none}
+  .pagina[hidden]{display:flex!important}
+  .pagina{break-after:page}
+}
+</style>
+
+<div class="cuaderno">
+  <header class="cabecera">
+    <div class="marca">
+      <svg width="34" height="34" viewBox="-40 -48 80 90" aria-hidden="true"><ellipse cx="0" cy="-40" rx="11" ry="3.5" fill="none" stroke="#f7c85c" stroke-width="3"/><path d="M-8,-2 C-40,-30 -62,-8 -54,14 C-44,30 -22,22 -8,10Z" fill="#fff"/><path d="M8,-2 C40,-30 62,-8 54,14 C44,30 22,22 8,10Z" fill="#fff"/><path d="M-16,0 Q0,-8 16,0 L24,40 Q0,50 -24,40Z" fill="#fff8e8"/><circle cy="-18" r="15" fill="#ffe2c8"/><path d="M-15,-20 Q-14,-36 0,-35 Q14,-36 15,-20 Q10,-28 2,-27 Q-6,-30 -15,-20Z" fill="#f2b84b"/></svg>
+      <div><b>Mi Angelito Guardián</b><span>Cuaderno mágico</span></div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="chip-btn" id="btnImprimir" type="button" hidden>Imprimir</button>
+      <div class="guardado"><i></i>Todo se guarda solito</div>
+    </div>
+  </header>
+
+  <nav class="barra-top" aria-label="Actividades del cuaderno"><div class="chips" id="chips"></div></nav>
+
+  <main class="hoja" id="hoja">
+
+    <!-- 0 Portada -->
+    <section class="pagina" data-titulo="Portada">
+      <div class="folio">Kit Mi Angelito Guardián</div>
+      <h1>Mi <em>Cuaderno</em> Mágico</h1>
+      <p class="intro">Este cuaderno es para conocer a tu ángel guardián, pintarlo, escribirle y contarle cosas. Pídele a tu mamá o a tu papá que te acompañe.</p>
+      <svg viewBox="0 0 300 140" style="max-width:340px;width:100%;margin:4px auto" aria-hidden="true">
+        <g transform="translate(150 78) scale(1.25)"><circle r="56" fill="#f7c85c" opacity=".22"/><path d="M-8,-2 C-40,-30 -62,-8 -54,14 C-44,30 -22,22 -8,10Z" fill="#fff" stroke="#2a2456" stroke-width="1.6"/><path d="M8,-2 C40,-30 62,-8 54,14 C44,30 22,22 8,10Z" fill="#fff" stroke="#2a2456" stroke-width="1.6"/><path d="M-16,0 Q0,-8 16,0 L24,40 Q0,50 -24,40Z" fill="#fff8e8" stroke="#2a2456" stroke-width="1.6"/><circle cy="-18" r="15" fill="#ffe2c8" stroke="#2a2456" stroke-width="1.6"/><path d="M-15,-20 Q-14,-36 0,-35 Q14,-36 15,-20 Q10,-28 2,-27 Q-6,-30 -15,-20Z" fill="#f2b84b" stroke="#2a2456" stroke-width="1.6"/><ellipse cy="-42" rx="11" ry="3.5" fill="none" stroke="#e0a52c" stroke-width="3"/><circle cx="-5" cy="-17" r="2" fill="#2a2456"/><circle cx="5" cy="-17" r="2" fill="#2a2456"/><path d="M-4,-10 Q0,-6 4,-10" fill="none" stroke="#2a2456" stroke-width="1.6" stroke-linecap="round"/></g>
+        <use href="#estrellaR" transform="translate(40 40) scale(1.3)" fill="#ffd65a"/><use href="#estrellaR" transform="translate(262 34)" fill="#ffd65a"/><use href="#estrellaR" transform="translate(250 112) scale(.8)" fill="#ffd65a"/>
+      </svg>
+      <div class="fila">
+        <label class="campo" for="inNino">Este cuaderno es de
+          <input id="inNino" data-guardar="nino" maxlength="16" placeholder="Escribe tu nombre" autocomplete="off">
+        </label>
+        <label class="campo" for="inEdad">Tengo
+          <input id="inEdad" data-guardar="edad" maxlength="10" placeholder="años" autocomplete="off">
+        </label>
+      </div>
+      <div class="menu-titulo">¿Qué quieres hacer hoy?</div>
+      <div class="menu" id="menuAct"></div>
+    </section>
+
+    <!-- 1 Mi ángel -->
+    <section class="pagina" data-titulo="Mi ángel" hidden>
+      <div class="folio">Actividad 1</div>
+      <h2>Mi ángel se llama…</h2>
+      <p class="intro">Lumi es el ángel del cuento. ¿Cómo se llama el tuyo? Ponle un nombre bonito y después píntalo con tus colores favoritos.</p>
+      <label class="campo" for="inAngel">Nombre de mi ángel
+        <input id="inAngel" data-guardar="angel" maxlength="16" placeholder="Por ejemplo: Lumi, Celeste, Rayito" autocomplete="off">
+      </label>
+      <div class="lienzo">
+        <svg viewBox="0 0 300 330" id="dibAngel" aria-label="Ángel para colorear">
+          <rect data-zona="a-cielo" x="0" y="0" width="300" height="330" fill="#fff" stroke="none"/>
+          <use data-zona="a-e1" href="#estrellaR" transform="translate(40 46) scale(1.6)" fill="#fff"/>
+          <use data-zona="a-e2" href="#estrellaR" transform="translate(262 60) scale(1.3)" fill="#fff"/>
+          <use data-zona="a-e3" href="#estrellaR" transform="translate(252 222) scale(1.1)" fill="#fff"/>
+          <path data-zona="a-nube" d="M18 312 Q14 282 44 284 Q52 262 78 272 Q100 262 108 286 Q132 288 128 312Z" fill="#fff"/>
+          <path data-zona="a-nube2" d="M176 314 Q172 290 196 292 Q206 272 230 282 Q252 274 258 296 Q284 296 282 314Z" fill="#fff"/>
+          <g transform="translate(150 178) scale(2.55)">
+            <path data-zona="a-alaI" d="M-8,-2 C-40,-30 -62,-8 -54,14 C-44,30 -22,22 -8,10Z" fill="#fff" vector-effect="non-scaling-stroke"/>
+            <path data-zona="a-alaD" d="M8,-2 C40,-30 62,-8 54,14 C44,30 22,22 8,10Z" fill="#fff" vector-effect="non-scaling-stroke"/>
+            <path class="linea" d="M-20,-4 C-32,-10 -40,-2 -42,8 M-18,4 C-28,2 -36,8 -38,14 M20,-4 C32,-10 40,-2 42,8 M18,4 C28,2 36,8 38,14" vector-effect="non-scaling-stroke" style="stroke-width:1.6"/>
+            <path data-zona="a-tunica" d="M-16,0 Q0,-8 16,0 L24,40 Q0,50 -24,40Z" fill="#fff" vector-effect="non-scaling-stroke"/>
+            <path class="linea" d="M-22,34 Q0,43 22,34" vector-effect="non-scaling-stroke" style="stroke-width:1.6"/>
+            <path data-zona="a-manga" d="M-12,6 L-28,-6 L-24,-10 L-9,0Z" fill="#fff" vector-effect="non-scaling-stroke"/>
+            <circle data-zona="a-manoI" cx="-29" cy="-9" r="4.5" fill="#fff" vector-effect="non-scaling-stroke"/>
+            <path data-zona="a-manga2" d="M12,6 L31,12 L29,17 L10,12Z" fill="#fff" vector-effect="non-scaling-stroke"/>
+            <path data-zona="a-farol" d="M31 12 h10 l2 4 v12 a3 3 0 0 1 -3 3 h-8 a3 3 0 0 1 -3 -3 v-12z" fill="#fff" vector-effect="non-scaling-stroke"/>
+            <rect data-zona="a-luz" x="32.5" y="17" width="7" height="10" rx="2" fill="#fff" vector-effect="non-scaling-stroke"/>
+            <circle data-zona="a-cara" cy="-18" r="15" fill="#fff" vector-effect="non-scaling-stroke"/>
+            <path data-zona="a-pelo" d="M-15,-20 Q-14,-36 0,-35 Q14,-36 15,-20 Q10,-28 2,-27 Q-6,-30 -15,-20Z" fill="#fff" vector-effect="non-scaling-stroke"/>
+            <path data-zona="a-aureola" fill-rule="evenodd" d="M-13,-42 a13,5 0 1,0 26,0 a13,5 0 1,0 -26,0Z M-9,-42 a9,2.4 0 1,0 18,0 a9,2.4 0 1,0 -18,0Z" fill="#fff" vector-effect="non-scaling-stroke"/>
+            <circle class="ojo" cx="-5" cy="-17" r="2"/><circle class="ojo" cx="5" cy="-17" r="2"/>
+            <path class="linea" d="M-4,-10 Q0,-6 4,-10" vector-effect="non-scaling-stroke" style="stroke-width:1.8"/>
+          </g>
+        </svg>
+      </div>
+      <div class="crayolas" data-para="dibAngel"></div>
+      <div class="herramientas"><button class="mini" type="button" data-limpiar="dibAngel">Borrar los colores</button></div>
+    </section>
+
+    <!-- 2 La noche sin miedo -->
+    <section class="pagina" data-titulo="Pinta la noche" hidden>
+      <div class="folio">Actividad 2</div>
+      <h2>Pinta una noche sin miedo</h2>
+      <p class="intro">La noche no es oscura del todo: tiene luna, estrellas y una casita donde tu ángel te cuida. Píntala como tú quieras.</p>
+      <div class="lienzo">
+        <svg viewBox="0 0 300 240" id="dibNoche" aria-label="Noche para colorear">
+          <rect data-zona="n-cielo" x="0" y="0" width="300" height="240" fill="#fff" stroke="none"/>
+          <path data-zona="n-luna" d="M236 30 A30 30 0 1 0 262 82 A24 24 0 1 1 236 30Z" fill="#fff"/>
+          <use data-zona="n-e1" href="#estrellaR" transform="translate(40 34) scale(1.3)" fill="#fff"/>
+          <use data-zona="n-e2" href="#estrellaR" transform="translate(110 58)" fill="#fff"/>
+          <use data-zona="n-e3" href="#estrellaR" transform="translate(178 28) scale(1.1)" fill="#fff"/>
+          <use data-zona="n-e4" href="#estrellaR" transform="translate(70 100) scale(.8)" fill="#fff"/>
+          <path data-zona="n-nube" d="M140 108 Q136 88 158 90 Q166 74 186 82 Q204 76 208 94 Q226 96 224 112Z" fill="#fff"/>
+          <path data-zona="n-colina2" d="M0 190 Q70 150 150 176 Q220 150 300 172 L300 240 L0 240Z" fill="#fff"/>
+          <path data-zona="n-colina" d="M0 214 Q90 186 170 206 Q240 192 300 208 L300 240 L0 240Z" fill="#fff"/>
+          <rect data-zona="n-casa" x="64" y="140" width="76" height="62" fill="#fff"/>
+          <path data-zona="n-techo" d="M54 144 L102 104 L150 144Z" fill="#fff"/>
+          <rect data-zona="n-ventana" x="76" y="154" width="22" height="20" rx="3" fill="#fff"/>
+          <rect data-zona="n-puerta" x="110" y="166" width="18" height="36" rx="8" fill="#fff"/>
+          <path class="linea" d="M87 154 V174 M76 164 H98"/>
+          <path data-zona="n-arbol" d="M228 196 Q206 196 212 172 Q200 156 220 146 Q222 126 240 132 Q260 126 262 146 Q280 156 268 172 Q274 196 252 196Z" fill="#fff"/>
+          <rect data-zona="n-tronco" x="234" y="194" width="12" height="20" fill="#fff"/>
+        </svg>
+      </div>
+      <div class="crayolas" data-para="dibNoche"></div>
+      <div class="herramientas"><button class="mini" type="button" data-limpiar="dibNoche">Borrar los colores</button></div>
+    </section>
+
+    <!-- 3 Dibujo libre -->
+    <section class="pagina" data-titulo="Dibuja" hidden>
+      <div class="folio">Actividad 3</div>
+      <h2>Así me imagino a mi ángel</h2>
+      <p class="intro">Cierra los ojos un momentico. ¿Cómo es tu ángel? ¿De qué color son sus alas? Ahora dibújalo aquí con el dedo.</p>
+      <div class="pizarra"><canvas id="pizarra" width="800" height="600" aria-label="Espacio para dibujar"></canvas></div>
+      <div class="crayolas" data-para="pizarra"></div>
+      <div class="herramientas">
+        <button class="mini" type="button" data-grosor="5">Fino</button>
+        <button class="mini" type="button" data-grosor="12" aria-pressed="true">Mediano</button>
+        <button class="mini" type="button" data-grosor="26">Grueso</button>
+        <button class="mini" type="button" id="borrador">Borrador</button>
+        <button class="mini" type="button" id="limpiarPizarra">Empezar de nuevo</button>
+      </div>
+    </section>
+
+    <!-- 4 Carta -->
+    <section class="pagina" data-titulo="Carta" hidden>
+      <div class="folio">Actividad 4</div>
+      <h2>Una carta para mi ángel</h2>
+      <p class="intro">Cuéntale a tu ángel cómo te sientes, qué te pone feliz o qué te preocupa. Si todavía no sabes escribir, tu mamá o tu papá pueden escribir lo que tú les digas.</p>
+      <div class="carta">
+        <div class="saludo">Querido <span class="nombreAngel">ángel</span>:</div>
+        <label for="txtCarta" style="position:absolute;left:-9999px">Carta</label>
+        <textarea id="txtCarta" data-guardar="carta" placeholder="Hoy quiero contarte que…"></textarea>
+        <div class="firma">Con cariño, <span class="nombreNino">yo</span></div>
+      </div>
+    </section>
+
+    <!-- 5 Señales -->
+    <section class="pagina" data-titulo="Señales" hidden>
+      <div class="folio">Actividad 5</div>
+      <h2>Mi diario de señales</h2>
+      <p class="intro">Los ángeles nos dejan señales. Cada día, mira con atención y marca las que encontraste: una pluma, una mariposa, un arcoíris, un sueño bonito o un calorcito en el corazón.</p>
+      <div class="tabla-scroll"><table class="senales" id="tablaSenales"></table></div>
+    </section>
+
+    <!-- 6 Gracias -->
+    <section class="pagina" data-titulo="Gracias" hidden>
+      <div class="folio">Actividad 6</div>
+      <h2>Hoy doy gracias por…</h2>
+      <p class="intro">Antes de dormir, piensa en tres cosas bonitas de tu día. Cada vez que escribas una, tu corazón se llena de color.</p>
+      <div class="corazones" id="corazones"></div>
+    </section>
+
+    <!-- 7 Miedos -->
+    <section class="pagina" data-titulo="Miedos" hidden>
+      <div class="folio">Actividad 7</div>
+      <h2>El miedo se hace chiquitico</h2>
+      <p class="intro">Escribe algo que te dé miedo. Después toca las palabras secretas y mira lo que pasa.</p>
+      <div class="miedo-caja" id="cajaMiedo">
+        <label for="inMiedo">Algo que me da miedo es…
+          <input id="inMiedo" maxlength="60" placeholder="Por ejemplo: la oscuridad" autocomplete="off">
+        </label>
+        <div class="miedo-texto" id="miedoTexto"></div>
+        <button class="boton" type="button" id="btnDulce">¡Dulce compañía!</button>
+        <div id="respuestaLumi"></div>
+      </div>
+      <div>
+        <div class="folio" style="margin-bottom:8px">Miedos que ya se hicieron estrellas</div>
+        <div class="lista-estrellas" id="listaMiedos"></div>
+      </div>
+    </section>
+
+    <!-- 8 Certificado -->
+    <section class="pagina" data-titulo="Certificado" hidden>
+      <div class="folio">Para terminar</div>
+      <div class="certificado">
+        <svg class="sello-oro" viewBox="-50 -50 100 100" aria-hidden="true">
+          <path d="M0,-46 L9,-36 22,-40 25,-27 38,-24 35,-11 46,0 35,11 38,24 25,27 22,40 9,36 0,46 -9,36 -22,40 -25,27 -38,24 -35,11 -46,0 -35,-11 -38,-24 -25,-27 -22,-40 -9,-36Z" fill="#f7c85c"/>
+          <circle r="30" fill="#fff6d6" stroke="#e0a52c" stroke-width="2"/>
+          <path d="M-5,-2 C-22,-16 -34,-4 -30,8 C-24,17 -12,12 -5,6Z M5,-2 C22,-16 34,-4 30,8 C24,17 12,12 5,6Z" fill="#fff" stroke="#c99325" stroke-width="1.5"/>
+          <circle cy="-10" r="7" fill="#ffe2c8" stroke="#c99325" stroke-width="1.5"/>
+          <path d="M-9,0 Q0,-5 9,0 L13,20 Q0,25 -13,20Z" fill="#fff" stroke="#c99325" stroke-width="1.5"/>
+          <ellipse cy="-21" rx="6" ry="2" fill="none" stroke="#c99325" stroke-width="2"/>
+        </svg>
+        <div class="eyebrow">Certificado de protección angelical</div>
+        <h3>Se certifica con mucho amor que</h3>
+        <div class="nombre nombreNino">tu nombre</div>
+        <p>está bajo el cuidado de su ángel guardián, <b class="nombreAngel">tu ángel</b>, que camina a su lado de día y de noche, en el colegio, en el juego y en cada sueño.</p>
+        <p class="oracion">Ángel de mi guarda, mi dulce compañía,<br>no me desampares ni de noche ni de día.</p>
+        <div class="firmas">
+          <div><b class="nombreAngel">tu ángel</b>Firma de mi ángel guardián</div>
+          <div><b>&nbsp;</b>Firma de mamá o papá</div>
+        </div>
+        <p style="font-size:14px;color:#6a6297" id="fechaCert"></p>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="mandos" aria-label="Pasar página">
+    <button class="nav" id="atras" type="button" aria-label="Página anterior"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="progreso"><b id="pasoNombre"></b><span id="pasoSig"></span></div>
+    <button class="nav" id="adelante" type="button" aria-label="Página siguiente"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <p class="pie">Parte del Kit Mi Angelito Guardián · Lo que hagas aquí queda guardado en este dispositivo</p>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs><path id="estrellaR" d="M0,-11 L3,-3.5 L11,-3.4 L4.8,2 L7,10.5 L0,5.6 L-7,10.5 L-4.8,2 L-11,-3.4 L-3,-3.5Z" stroke="#2a2456" stroke-width="1.6" stroke-linejoin="round"/></defs>
+</svg>
+
+<script>
+(function(){
+  const CLAVE='cuaderno-magico-v1';
+  let D={};
+  try{D=JSON.parse(localStorage.getItem(CLAVE)||'{}')||{};}catch(e){D={};}
+  D.colores=D.colores||{}; D.senales=D.senales||{}; D.gracias=D.gracias||['','','']; D.miedos=D.miedos||[];
+  let tGuardar=null;
+  function guardar(){clearTimeout(tGuardar);tGuardar=setTimeout(()=>{try{localStorage.setItem(CLAVE,JSON.stringify(D));}catch(e){}},250);}
+
+  /* ---------- Sonido suave ---------- */
+  let ac=null;
+  function sonar(notas){
+    try{
+      ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+      if(ac.state==='suspended') ac.resume();
+      const t=ac.currentTime+.02;
+      notas.forEach(([f,d,dur])=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=f;
+        g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.11,t+d+.02);g.gain.exponentialRampToValueAtTime(.0005,t+d+dur);
+        o.connect(g).connect(ac.destination);o.start(t+d);o.stop(t+d+dur+.05);});
+    }catch(e){}
+  }
+  const TOQUE=[[1047,0,.25],[1319,.06,.3]], MAGIA=[[784,0,.5],[988,.09,.5],[1175,.18,.5],[1568,.27,.8]];
+
+  /* ---------- Páginas ---------- */
+  const paginas=[...document.querySelectorAll('.pagina')];
+  const chips=document.getElementById('chips'), menu=document.getElementById('menuAct'), hojaEl=document.getElementById('hoja');
+  const SUB=['','Ponle nombre y píntalo','Luna, estrellas y casita','Dibújalo con el dedo','Cuéntale cómo te sientes','Plumas, mariposas y más','Tres cosas bonitas de hoy','Haz chiquitico tu miedo','Tu diploma de protección'];
+  let actual=0;
+  try{const g=parseInt(sessionStorage.getItem('cuaderno-pag'),10); if(g>=0&&g<paginas.length) actual=g;}catch(e){}
+  paginas.forEach((pg,i)=>{
+    const b=document.createElement('button'); b.type='button';
+    b.innerHTML=`<i>${i===0?'★':i}</i>${pg.dataset.titulo}`;
+    b.addEventListener('click',()=>ir(i,true)); chips.appendChild(b);
+    if(i>0){
+      const m=document.createElement('button'); m.type='button';
+      m.innerHTML=`<i>${i}</i><div><b>${pg.dataset.titulo}</b><span>${SUB[i]}</span></div>`;
+      m.addEventListener('click',()=>ir(i,true)); menu.appendChild(m);
+    }
+  });
+  function ir(i,desplazar){
+    if(i<0||i>=paginas.length) return;
+    actual=i;
+    paginas.forEach((pg,j)=>pg.hidden=j!==i);
+    [...chips.children].forEach((b,j)=>b.setAttribute('aria-current',j===i));
+    const chip=chips.children[i];
+    chips.scrollTo({left:chip.offsetLeft-(chips.clientWidth-chip.offsetWidth)/2,behavior:'smooth'});
+    document.getElementById('atras').disabled=i===0;
+    document.getElementById('adelante').disabled=i===paginas.length-1;
+    document.getElementById('pasoNombre').textContent=i===0?'Portada':`${i} de ${paginas.length-1}: ${paginas[i].dataset.titulo}`;
+    document.getElementById('pasoSig').textContent=i<paginas.length-1?`Sigue: ${paginas[i+1].dataset.titulo}`:'¡Terminaste tu cuaderno!';
+    try{sessionStorage.setItem('cuaderno-pag',i);}catch(e){}
+    if(desplazar&&hojaEl.getBoundingClientRect().top<0) hojaEl.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  document.addEventListener('keydown',e=>{
+    if(/INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    if(e.key==='ArrowRight') ir(actual+1,true);
+    if(e.key==='ArrowLeft') ir(actual-1,true);
+  });
+  document.getElementById('atras').addEventListener('click',()=>ir(actual-1,true));
+  document.getElementById('adelante').addEventListener('click',()=>ir(actual+1,true));
+
+  /* ---------- Campos de texto ---------- */
+  document.querySelectorAll('[data-guardar]').forEach(el=>{
+    const k=el.dataset.guardar; if(D[k]) el.value=D[k];
+    el.addEventListener('input',()=>{D[k]=el.value;guardar();pintarNombres();});
+  });
+  function pintarNombres(){
+    const nino=(D.nino||'').trim(), angel=(D.angel||'').trim();
+    document.querySelectorAll('.nombreNino').forEach(e=>e.textContent=nino||(e.closest('.certificado')?'tu nombre':'yo'));
+    document.querySelectorAll('.nombreAngel').forEach(e=>e.textContent=angel||(e.closest('.saludo')?'ángel':'tu ángel'));
+  }
+  const f=new Date();
+  document.getElementById('fechaCert').textContent='Fecha: '+f.toLocaleDateString('es-CO',{day:'numeric',month:'long',year:'numeric'});
+
+  /* ---------- Crayolas ---------- */
+  const COLORES=[['Amarillo','#ffd65a'],['Naranja','#f7a33c'],['Rojo','#ef6f6c'],['Rosado','#ff9ec4'],['Lila','#c79bf2'],['Morado','#7f6be0'],['Azul noche','#2f3a8f'],['Azul','#5aa9f0'],['Celeste','#a9dcf5'],['Verde','#5fc79b'],['Café','#9a5c3e'],['Piel clara','#ffe2c8'],['Piel trigueña','#e0a87c'],['Piel morena','#8d5a3b'],['Blanco','#ffffff'],['Negro','#2a2456']];
+  const elegido={dibAngel:'#ffd65a',dibNoche:'#2f3a8f',pizarra:'#7f6be0'};
+  document.querySelectorAll('.crayolas').forEach(cont=>{
+    const para=cont.dataset.para;
+    COLORES.forEach(([nom,hex])=>{
+      const b=document.createElement('button'); b.type='button'; b.className='crayola'; b.style.background=hex;
+      b.setAttribute('aria-label',nom); b.setAttribute('aria-pressed',hex===elegido[para]);
+      b.addEventListener('click',()=>{elegido[para]=hex;[...cont.children].forEach(x=>x.setAttribute('aria-pressed',x===b)); if(para==='pizarra'){borrando=false;document.getElementById('borrador').setAttribute('aria-pressed','false');} sonar([[880+Math.random()*400,0,.15]]);});
+      cont.appendChild(b);
+    });
+  });
+
+  /* ---------- Colorear por zonas ---------- */
+  ['dibAngel','dibNoche'].forEach(id=>{
+    const svg=document.getElementById(id);
+    svg.querySelectorAll('[data-zona]').forEach(z=>{
+      const k=z.dataset.zona;
+      if(D.colores[k]) z.style.fill=D.colores[k];
+      z.setAttribute('tabindex','0'); z.setAttribute('role','button'); z.setAttribute('aria-label','Pintar');
+      const pintar=()=>{z.style.fill=elegido[id];D.colores[k]=elegido[id];guardar();sonar(TOQUE);};
+      z.addEventListener('click',pintar);
+      z.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pintar();}});
+    });
+  });
+  document.querySelectorAll('[data-limpiar]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const svg=document.getElementById(b.dataset.limpiar);
+      svg.querySelectorAll('[data-zona]').forEach(z=>{z.style.fill='';delete D.colores[z.dataset.zona];});
+      guardar();
+    });
+  });
+
+  /* ---------- Pizarra para dibujar ---------- */
+  const cv=document.getElementById('pizarra'), cx=cv.getContext('2d');
+  let grosor=12, borrando=false, dibujando=false, ult=null;
+  function fondoBlanco(){cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height);}
+  fondoBlanco();
+  if(D.dibujo){const im=new Image();im.onload=()=>cx.drawImage(im,0,0,cv.width,cv.height);im.src=D.dibujo;}
+  function punto(e){const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height];}
+  cv.addEventListener('pointerdown',e=>{dibujando=true;ult=punto(e);try{cv.setPointerCapture(e.pointerId);}catch(err){}trazo(ult,ult);});
+  cv.addEventListener('pointermove',e=>{if(!dibujando)return;const p=punto(e);trazo(ult,p);ult=p;});
+  function fin(){if(!dibujando)return;dibujando=false;try{D.dibujo=cv.toDataURL('image/png');guardar();}catch(e){}}
+  cv.addEventListener('pointerup',fin);cv.addEventListener('pointercancel',fin);cv.addEventListener('pointerleave',fin);
+  function trazo(a,b){
+    cx.lineCap='round';cx.lineJoin='round';cx.lineWidth=borrando?grosor*2.2:grosor;
+    cx.strokeStyle=borrando?'#fff':elegido.pizarra;
+    cx.beginPath();cx.moveTo(a[0],a[1]);cx.lineTo(b[0]+.01,b[1]);cx.stroke();
+  }
+  document.querySelectorAll('[data-grosor]').forEach(b=>b.addEventListener('click',()=>{
+    grosor=+b.dataset.grosor;document.querySelectorAll('[data-grosor]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  }));
+  const bBorr=document.getElementById('borrador');
+  bBorr.setAttribute('aria-pressed','false');
+  bBorr.addEventListener('click',()=>{borrando=!borrando;bBorr.setAttribute('aria-pressed',borrando);});
+  const bLimp=document.getElementById('limpiarPizarra');
+  let confirmar=false;
+  bLimp.addEventListener('click',()=>{
+    if(!confirmar){confirmar=true;bLimp.textContent='¿Seguro? Toca otra vez';setTimeout(()=>{confirmar=false;bLimp.textContent='Empezar de nuevo';},3000);return;}
+    confirmar=false;bLimp.textContent='Empezar de nuevo';fondoBlanco();delete D.dibujo;guardar();
+  });
+
+  /* ---------- Diario de señales ---------- */
+  const IC={
+    pluma:'<svg width="26" height="26" viewBox="0 0 24 24"><path d="M19 3C10 4 5 10 5 19l2-2c1-5 5-9 10-11-3 3-6 6-7 10 6-1 10-6 9-13z" fill="#c79bf2" stroke="#2a2456" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+    mariposa:'<svg width="26" height="26" viewBox="0 0 24 24"><path d="M12 8C9 3 3 3 3 8c0 3 3 4 6 4-3 1-5 3-3 6 2 2 5 0 6-3 1 3 4 5 6 3 2-3 0-5-3-6 3 0 6-1 6-4 0-5-6-5-9 0z" fill="#ff9ec4" stroke="#2a2456" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+    arcoiris:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M3 18a9 9 0 0 1 18 0" stroke="#ef6f6c"/><path d="M6 18a6 6 0 0 1 12 0" stroke="#ffd65a"/><path d="M9 18a3 3 0 0 1 6 0" stroke="#5aa9f0"/></svg>',
+    sueno:'<svg width="26" height="26" viewBox="0 0 24 24"><path d="M15 3a8 8 0 1 0 6 13A7 7 0 0 1 15 3z" fill="#ffd65a" stroke="#2a2456" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+    corazon:'<svg width="26" height="26" viewBox="0 0 24 24"><path d="M12 20C6 16 3 12 4.5 8.5 6 5.5 10 5.5 12 8.5c2-3 6-3 7.5 0C21 12 18 16 12 20z" fill="#ff8fa3" stroke="#2a2456" stroke-width="1.4" stroke-linejoin="round"/></svg>'
+  };
+  const SEN=[['pluma','Pluma'],['mariposa','Mariposa'],['arcoiris','Arcoíris'],['sueno','Sueño bonito'],['corazon','Calorcito']];
+  const DIAS=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  const tabla=document.getElementById('tablaSenales');
+  let h='<thead><tr><th></th>'+SEN.map(([k,n])=>`<th>${IC[k]}${n}</th>`).join('')+'</tr></thead><tbody>';
+  DIAS.forEach((d,i)=>{h+=`<tr><th class="dia" scope="row">${d}</th>`+SEN.map(([k,n])=>`<td><button type="button" class="sello" data-s="${i}-${k}" aria-label="${n} el ${d}" aria-pressed="${!!D.senales[i+'-'+k]}">${IC[k]}</button></td>`).join('')+'</tr>';});
+  tabla.innerHTML=h+'</tbody>';
+  tabla.addEventListener('click',e=>{
+    const b=e.target.closest('.sello'); if(!b) return;
+    const k=b.dataset.s, on=!D.senales[k];
+    if(on) D.senales[k]=1; else delete D.senales[k];
+    b.setAttribute('aria-pressed',on); guardar(); if(on) sonar(TOQUE);
+  });
+
+  /* ---------- Gracias ---------- */
+  const cor=document.getElementById('corazones');
+  D.gracias.forEach((v,i)=>{
+    const d=document.createElement('div'); d.className='corazon'+(v.trim()?' lleno':'');
+    d.innerHTML=`<svg viewBox="0 0 100 90" aria-hidden="true"><path d="M50 84C20 64 4 44 10 26 16 8 40 6 50 24 60 6 84 8 90 26 96 44 80 64 50 84Z"/></svg>
+      <label for="gr${i}" style="position:absolute;left:-9999px">Cosa bonita ${i+1}</label>
+      <input id="gr${i}" maxlength="40" placeholder="Doy gracias por…" autocomplete="off">`;
+    const inp=d.querySelector('input'); inp.value=v;
+    inp.addEventListener('input',()=>{const antes=!!D.gracias[i].trim();D.gracias[i]=inp.value;const ahora=!!inp.value.trim();d.classList.toggle('lleno',ahora);if(ahora&&!antes)sonar(TOQUE);guardar();});
+    cor.appendChild(d);
+  });
+
+  /* ---------- Miedos que se hacen chiquiticos ---------- */
+  const inM=document.getElementById('inMiedo'), mt=document.getElementById('miedoTexto'), caja=document.getElementById('cajaMiedo');
+  const resp=document.getElementById('respuestaLumi'), lista=document.getElementById('listaMiedos');
+  const ESTRELLA='<svg width="14" height="14" viewBox="-12 -12 24 24" aria-hidden="true"><path d="M0,-11 L3,-3.5 L11,-3.4 L4.8,2 L7,10.5 L0,5.6 L-7,10.5 L-4.8,2 L-11,-3.4 L-3,-3.5Z" fill="#e0a52c"/></svg>';
+  function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function pintarLista(){lista.innerHTML=D.miedos.length?D.miedos.map(m=>`<span>${ESTRELLA}${esc(m)}</span>`).join(''):'<p class="intro" style="font-size:15px">Aquí van a aparecer los miedos que ya se volvieron estrellas.</p>';}
+  pintarLista();
+  inM.addEventListener('input',()=>{mt.classList.remove('achica');mt.textContent=inM.value;resp.innerHTML='';});
+  document.getElementById('btnDulce').addEventListener('click',()=>{
+    const v=inM.value.trim();
+    if(!v){resp.innerHTML='<div class="mensaje-lumi">Primero escribe tu miedo arriba. Aquí te espero.</div>';inM.focus();return;}
+    mt.textContent=v; void mt.offsetWidth; mt.classList.add('achica'); sonar(MAGIA);
+    const r=caja.getBoundingClientRect();
+    for(let i=0;i<18;i++){
+      const s=document.createElement('div'); s.className='chispa'; s.innerHTML=ESTRELLA.replace('width="14" height="14"','width="14" height="14"');
+      s.style.left=(r.width/2-7)+'px'; s.style.top=(r.height*.45)+'px';
+      s.style.setProperty('--dx',(Math.random()*r.width-r.width/2)+'px'); s.style.setProperty('--dy',(Math.random()*-160-20)+'px');
+      caja.appendChild(s); setTimeout(()=>s.remove(),1700);
+    }
+    const ang=(D.angel||'').trim()||'Tu ángel';
+    setTimeout(()=>{
+      resp.innerHTML=`<div class="mensaje-lumi">${esc(ang)} dice: "Ya estoy aquí. Ese miedo se hizo chiquitico y ahora es una estrella. Cuando vuelva, dime dulce compañía."</div>`;
+      D.miedos.push(v); if(D.miedos.length>24) D.miedos.shift(); guardar(); pintarLista();
+      inM.value='';
+    },1300);
+  });
+
+  /* ---------- Imprimir (solo cuando se abre el archivo directo) ---------- */
+  try{ if(window.self===window.top){const bi=document.getElementById('btnImprimir');bi.hidden=false;bi.addEventListener('click',()=>window.print());} }catch(e){}
+
+  pintarNombres();
+  ir(actual);
+})();
+</script>
